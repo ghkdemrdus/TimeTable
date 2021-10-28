@@ -2,256 +2,206 @@ package com.luke.timetable
 
 import android.graphics.*
 import android.os.Bundle
-import android.util.TypedValue
-import android.view.Gravity
-import android.view.View
-import android.view.ViewGroup
+import android.util.DisplayMetrics
+import android.util.Log
+import android.view.*
 import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.luke.timetable.databinding.ActivityMainBinding
-import com.google.android.material.internal.ViewUtils.dpToPx
+import kotlin.math.ceil
 
 
 class MainActivity : AppCompatActivity() {
 
     private val mainViewModel: MainViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
+    lateinit var header: LinearLayout
+    lateinit var column: LinearLayout
+    lateinit var row: LinearLayout
+    var density = 0
+    var rowHeight = 0f
+    var rowWidth = 0f
+    var scale = 48
 
-    val row = 11
-    val column = 6
-    lateinit var tableBox: TableLayout
-
-    private var weekList = listOf(
-        "","월", "화", "수", "목", "금"
+    private var weeks = listOf(
+        "월", "화", "수", "목", "금", "토", "일"
     )
-    private var timeList = listOf(
+    private var times = listOf(
         9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7
     )
+    private var subjects = mutableListOf<Subject>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        density = ceil(resources.displayMetrics.density).toInt()
+
+        val bottomSheetDialog = AddSubjectFragment(mainViewModel)
 
         binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
             .apply {
                 lifecycleOwner = this@MainActivity
                 viewModel = mainViewModel
             }
-
-        binding.btn.setOnClickListener {
-            timetableView()
+        drawTimetable()
+        binding.btnAdd.setOnClickListener {
+            bottomSheetDialog.show(supportFragmentManager, "tag")
         }
-        tableBox = this.findViewById(R.id.tl)
-        createTimetable()
-//        val bitmap = Bitmap.createBitmap(700, 1000, Bitmap.Config.ALPHA_8)
-//        val canvas = Canvas(bitmap)
-//        val paint = Paint()
-//        paint.color = Color.RED
-//        canvas.drawLine(10f, 100f, 4000f, 400f, paint)
 
     }
 
-    fun createTimetable() {
-        createTimetableHeader()
-        createTimetableBody()
+    private fun drawTimetable() {
+        makeDataset()
+        drawTimetableHeader()
+        drawRow()
+        drawColumn(subjects)
+
     }
 
-    fun createTimetableHeader() {
-        val tableRow = TableRow(this)
-        tableRow.layoutParams = TableLayout.LayoutParams(
-            TableLayout.LayoutParams.MATCH_PARENT,
-            TableLayout.LayoutParams.MATCH_PARENT
-        )
-        for (i in 0 until column) {
-            val tv = TextView(this)
-            tv.layoutParams = TableRow.LayoutParams(50, 50)
-            tv.setText(weekList[i])
-            tv.setTextColor(resources.getColor(R.color.black))
-            tv.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-            tv.layoutParams = TableRow.LayoutParams(50, 50)
+    private fun makeDataset() {
+        subjects.add(Subject("소프트웨어공학", "14:00", "16:00", 1, 1))
+        subjects.add(Subject("소프트웨어공학", "14:00", "16:00", 3, 1))
+        subjects.add(Subject("사랑의 실천", "12:00", "13:30", 1, 3))
+        subjects.add(Subject("사랑의 실천", "12:00", "13:30", 3, 3))
+        subjects.add(Subject("인공지능", "10:30", "12:30", 0, 2))
+        subjects.add(Subject("인공지능", "15:00", "17:00", 4, 2))
+        subjects.add(Subject("컴파일러", "14:00", "16:00", 0, 4))
+        subjects.add(Subject("컴파일러", "17:00", "19:00", 2, 4))
+        subjects.add(Subject("라틴아메리카", "13:00", "15:00", 2, 5))
+        subjects.add(Subject("라틴아메리카", "9:00", "10:30", 4, 5))
+    }
 
-            tableRow.addView(tv)
+    fun drawTimetableHeader() {
+        header = findViewById(R.id.layout_header)
+        header.setBackgroundResource(R.drawable.bg_round_top_border_12_timetable)
+        val view = layoutInflater.inflate(R.layout.cell_left_top, header, false) as View
+        header.addView(view)
+        for (i in 0 until 5) {
+            val tv = layoutInflater.inflate(R.layout.cell_week, header, false) as TextView
+            tv.apply {
+                text = weeks[i]
+                gravity = Gravity.CENTER
+//                setTextColor(resources.getColor(R.color.black, theme))
+                setBackgroundResource(R.drawable.bg_line_left_border_timetable)
+            }
+            header.addView(tv)
         }
-        tableBox.addView(tableRow)
-
     }
 
-    fun createTimetableBody() {
-        for (i in 0 until row) {
-            val tableRow = TableRow(this)
-            tableRow.layoutParams = TableLayout.LayoutParams(
-                TableLayout.LayoutParams.MATCH_PARENT,
-                TableLayout.LayoutParams.MATCH_PARENT
+    fun drawRow() {
+        row = findViewById(R.id.layout_row)
+        for (i in 0 until 11) {
+            val ll = layoutInflater.inflate(R.layout.layout_timetable_row, row, false) as LinearLayout
+            ll.layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, (density * scale)
             )
-            for (j in 0 until column) {
-                val tv = TextView(this)
-                tv.layoutParams = TableRow.LayoutParams(50, 50)
-                tv.setBackgroundResource(R.color.purple_200)
-                if (j == 0) {
-                    tv.setText(timeList[i].toString())
-                    tv.setTextColor(resources.getColor(R.color.black))
-                    tv.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
-                    tv.layoutParams = TableRow.LayoutParams(50, 50)
-                } else {
-                    tv.text = ""
-                    tv.gravity = Gravity.RIGHT
-                    tv.layoutParams = TableRow.LayoutParams(50, 50)
-
-                }
-                tableRow.addView(tv)
+            if (i == 10) {
+                ll.setBackgroundResource(R.drawable.bg_round_bottom_border_12_timetable)
+            } else {
+                ll.setBackgroundResource(R.drawable.bg_border_row_timetable)
             }
-            tableBox.addView(tableRow)
-        }
-    }
 
-    fun timetableView() {
-        val l = LinearLayout(this)
-        val params = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        l.layoutParams = params
-        l.orientation = LinearLayout.HORIZONTAL
-
-        //EditText view
-        val e = EditText(applicationContext)
-        val paramsEditText = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT)
-        paramsEditText.weight = 1f
-        e.layoutParams = paramsEditText
-        e.hint = "Type new Task"
-
-        //Image View for close button
-
-        //Image View for close button
-        val i = ImageView(applicationContext)
-        val paramsImgView = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT)
-        paramsImgView.weight = 0.15f
-        i.background = resources.getDrawable(R.drawable.ic_launcher_background)
-
-        //Adding the EditText and Close Button to LinearLayout
-
-        //Adding the EditText and Close Button to LinearLayout
-        l.addView(e)
-        l.addView(i)
-        l.removeAllViews()
-        l.addView(e)
-        l.addView(i)
-
-        //Adding the Created LinearLayout to Container
-
-        //Adding the Created LinearLayout to Container
-        val finalParent = this.findViewById(R.id.container) as ViewGroup
-
-        finalParent.addView(l)
-
-        i.setOnClickListener {
-            val parent = i.parent as ViewGroup
-            parent.removeAllViews()
-            if (parent.parent != null) {
-                (parent.parent as ViewGroup).removeView(parent)
+            val tv = layoutInflater.inflate(R.layout.cell_time, row, false) as TextView
+            tv.apply {
+                text = times[i].toString()
+                gravity = Gravity.TOP or Gravity.RIGHT
             }
+            ll.addView(tv)
+            for (j in 0 until 5) {
+                val view1 = layoutInflater.inflate(R.layout.cell_grid, row, false) as View
+                view1.setBackgroundResource(R.drawable.bg_line_left_border_timetable)
+                ll.addView(view1)
+            }
+            row.addView(ll)
         }
-        //Adding OnClick Listener to Close button Image for removing the view
-
-        //Adding OnClick Listener to Close button Image for removing the view
+        row.viewTreeObserver.addOnGlobalLayoutListener {
+            rowWidth = row.measuredWidth.toFloat()
+            rowHeight = row.height.toFloat()
+        }
 
     }
 
-    fun createXmlElement(title: String, description: String) {
-        val parent = LinearLayout(this)
-        parent.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
+    fun drawColumn(list: List<Subject>) {
+        column = findViewById(R.id.layout_column)
+        for (i in 0 until 5) {
+            var startTime = 9f
+            val tmpList = classifySubject(list, i)
+            val ll = layoutInflater.inflate(R.layout.layout_timetable_column, column, false) as LinearLayout
+            for (j in tmpList.indices){
+                Log.d("TAG", "${tmpList[j]}")
+                drawDummy(ll, (density*scale*(timeToFloat(tmpList[j].startTime)-startTime)).toInt())
+                startTime = timeToFloat(tmpList[j].startTime)
+                drawSubject(ll, (density*scale*(timeToFloat(tmpList[j].endTime)-startTime)).toInt(), tmpList[j])
+                startTime = timeToFloat(tmpList[j].endTime)
+            }
+//            ll.setBackgroundColor(Color.BLUE)
+            column.addView(ll)
+        }
+    }
 
-        parent.orientation = LinearLayout.HORIZONTAL
-
-
-        //children of parent linearlayout
-        val iv = ImageView(this)
-        val lp = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-
-        lp.setMargins(0, 11, 7, 0)
-        iv.setLayoutParams(lp)
-        iv.setImageResource(R.drawable.ic_launcher_background)
-        iv.getLayoutParams().height = 40
-        iv.getLayoutParams().width = 46
-
-
-        parent.addView(iv); // lo agregamos al layout
-
-        val relativeP = RelativeLayout(this)
-        relativeP.layoutParams = RelativeLayout.LayoutParams(
-            RelativeLayout.LayoutParams.MATCH_PARENT,
-            RelativeLayout.LayoutParams.MATCH_PARENT
-        )
-
-        val linearCH = LinearLayout(this)
-        linearCH.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-        // TextView1
-        val tv1 = TextView(this)
-        val lptv1 = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-
-        lptv1.setMargins(0, 7, 0, 0)
-
-        tv1.setLayoutParams(lptv1)
-        tv1.setText(title) // title
-        tv1.setTextSize(TypedValue.COMPLEX_UNIT_SP, 25F)
-        tv1.setTypeface(null, Typeface.BOLD)
-
-        // TextView2
-        val tv2 = TextView(this)
-        val lptv2 = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-
-        lptv2.setMargins(0, 11, 7, 0)
-
-        tv2.setLayoutParams(lptv1)
-        tv2.setText(description) // description
-        tv2.setTextSize(TypedValue.COMPLEX_UNIT_SP, 25F)
-        tv2.setTypeface(null, Typeface.BOLD)
-
-        linearCH.removeAllViews()
-        linearCH.addView(tv1)
-        linearCH.addView(tv2)
-
-        relativeP.removeAllViews()
-        relativeP.addView(linearCH)
-
-        // last ImageView
-        val iv2 = ImageView(this)
-        val lpiv2 = RelativeLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-
-        lpiv2.setMargins(0, 11, 7, 0)
-        lpiv2.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
-        iv2.setLayoutParams(lpiv2)
-        iv2.setImageResource(R.drawable.ic_launcher_background)
-        iv2.getLayoutParams().height = 40
-        iv2.getLayoutParams().width = 46
+    fun drawDummy(linearLayout: LinearLayout, height: Int){
+        val view = layoutInflater.inflate(R.layout.cell_subject, linearLayout, false) as TextView
+        view.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, height)
+        linearLayout.addView(view)
+    }
+    fun drawSubject(linearLayout: LinearLayout, height: Int, subject: Subject){
+        val view = layoutInflater.inflate(R.layout.cell_subject, linearLayout, false) as TextView
+        view.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, height-density*2)
+        view.background = view.context.getDrawable(R.drawable.bg_round_border_subject_color_67)
+//        val marginParam = linearLayout.layoutParams as ViewGroup.MarginLayoutParams
+//        marginParam.setMargins(0,0,0,-100)
+//        marginParam.bottomMargin = dptopx(10).toInt()
+//        view.layoutParams = marginParam
+        view.setText(subject.name)
+        view.setBackgroundResource(setColor(subject.color))
+        linearLayout.addView(view)
+        val line = layoutInflater.inflate(R.layout.cell_subject_bottom, linearLayout, false) as View
+        line.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, density*2)
+        linearLayout.addView(line)
 
 
-        parent.removeAllViews()
-        parent.addView(iv)
-        parent.addView(relativeP)
-        parent.addView(iv2)
+    }
 
-        val finalParent = this.findViewById(R.id.cl1) as ViewGroup
+    fun classifySubject(list:List<Subject>, day: Int): List<Subject>{
+        var tmpList = mutableListOf<Subject>()
+        for(i in list.indices){
 
-        finalParent.addView(parent)
+            if(list[i].day == day){
+                tmpList.add(list[i])
+            }
+        }
+        return sortSubject(tmpList)
+    }
+
+    fun sortSubject(list: List<Subject>): List<Subject>{
+        return list.sortedBy { timeToFloat(it.startTime) }
+    }
+
+    fun timeToFloat(time : String): Float{
+        val timeSplit = time.split(":")
+        return timeSplit[0].toFloat()+timeSplit[1].toFloat()/60
+    }
+
+    fun dptopx(dp: Int): Float {
+        val metrics = resources.displayMetrics
+        return dp * ((metrics.densityDpi.toFloat()) / DisplayMetrics.DENSITY_DEFAULT)
+    }
+
+    fun setColor(idx : Int) : Int{
+        return when(idx){
+            0 -> R.drawable.bg_round_border_subject_color_1
+            1 -> R.drawable.bg_round_border_subject_color_3
+            2 -> R.drawable.bg_round_border_subject_color_5
+            3 -> R.drawable.bg_round_border_subject_color_10
+            4 -> R.drawable.bg_round_border_subject_color_13
+            5 -> R.drawable.bg_round_border_subject_color_17
+            6 -> R.drawable.bg_round_border_subject_color_7
+            7 -> R.drawable.bg_round_border_subject_color_12
+            8 -> R.drawable.bg_round_border_subject_color_35
+            9 -> R.drawable.bg_round_border_subject_color_69
+            else -> R.drawable.bg_round_border_subject_color_67
+
+        }
     }
 }
