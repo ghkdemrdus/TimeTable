@@ -26,9 +26,11 @@
         <entry key="..\:/Users/Deukyeon/AndroidStudioProjects/TimeTable/app/src/main/res/layout/cell_tranparent.xml" value="0.2898148148148148" />
         <entry key="..\:/Users/Deukyeon/AndroidStudioProjects/TimeTable/app/src/main/res/layout/cell_week.xml" value="0.12864583333333332" />
         <entry key="..\:/Users/Deukyeon/AndroidStudioProjects/TimeTable/app/src/main/res/layout/dialog_bottom_sheet.xml" value="0.264" />
+        <entry key="..\:/Users/Deukyeon/AndroidStudioProjects/TimeTable/app/src/main/res/layout/fragment_add_subject.xml" value="0.24537037037037038" />
         <entry key="..\:/Users/Deukyeon/AndroidStudioProjects/TimeTable/app/src/main/res/layout/layout_subject.xml" value="0.20052083333333334" />
         <entry key="..\:/Users/Deukyeon/AndroidStudioProjects/TimeTable/app/src/main/res/layout/layout_timetable_column.xml" value="0.32685185185185184" />
         <entry key="..\:/Users/Deukyeon/AndroidStudioProjects/TimeTable/app/src/main/res/layout/layout_timetable_row.xml" value="0.32685185185185184" />
+        <entry key="..\:/Users/Deukyeon/AndroidStudioProjects/TimeTable/app/src/main/res/layout/picker_subject_time.xml" value="0.25462962962962965" />
         <entry key="..\:/Users/Deukyeon/AndroidStudioProjects/TimeTable/app/src/main/res/layout/picker_week_and_time.xml" value="0.13240740740740742" />
         <entry key="..\:/Users/Deukyeon/AndroidStudioProjects/TimeTable/app/src/main/res/layout/post_bottom_sheet.xml" value="0.1" />
       </map>

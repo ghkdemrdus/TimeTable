@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         density = ceil(resources.displayMetrics.density).toInt()
 
-        val bottomSheetDialog = AddSubjectFragment(mainViewModel)
+        val bottomSheetDialog = AddSubjectFragment()
 
         binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
             .apply {
@@ -129,7 +129,6 @@ class MainActivity : AppCompatActivity() {
             val tmpList = classifySubject(list, i)
             val ll = layoutInflater.inflate(R.layout.layout_timetable_column, column, false) as LinearLayout
             for (j in tmpList.indices){
-                Log.d("TAG", "${tmpList[j]}")
                 drawDummy(ll, (density*scale*(timeToFloat(tmpList[j].startTime)-startTime)).toInt())
                 startTime = timeToFloat(tmpList[j].startTime)
                 drawSubject(ll, (density*scale*(timeToFloat(tmpList[j].endTime)-startTime)).toInt(), tmpList[j])

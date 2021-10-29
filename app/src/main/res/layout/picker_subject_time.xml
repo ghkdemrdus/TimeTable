@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
 
@@ -19,38 +20,38 @@
 
             <NumberPicker
                 android:id="@+id/picker_day_of_week"
-                android:layout_width="wrap_content"
+                android:layout_width="30dp"
                 android:layout_height="150dp"
                 android:layout_margin="10dp" />
 
             <NumberPicker
                 android:id="@+id/picker_start_hour"
-                android:layout_width="wrap_content"
+                android:layout_width="50dp"
                 android:layout_height="150dp"
                 android:layout_margin="10dp" />
 
             <NumberPicker
                 android:id="@+id/picker_start_minute"
-                android:layout_width="wrap_content"
+                android:layout_width="50dp"
                 android:layout_height="150dp"
                 android:layout_margin="10dp" />
 
             <NumberPicker
                 android:id="@+id/picker_end_hour"
-                android:layout_width="wrap_content"
+                android:layout_width="50dp"
                 android:layout_height="150dp"
                 android:layout_margin="10dp" />
 
             <NumberPicker
                 android:id="@+id/picker_end_minute"
-                android:layout_width="wrap_content"
+                android:layout_width="50dp"
                 android:layout_height="150dp"
                 android:layout_margin="10dp" />
 
         </LinearLayout>
 
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
@@ -59,20 +60,22 @@
 
             <Button
                 android:id="@+id/btn_cancel"
-                android:layout_width="0dp"
+                android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:text="취소"
-                android:layout_weight="1"
-                android:textAllCaps="false" />
+                android:textAllCaps="false"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btn_confirm"/>
 
             <Button
                 android:id="@+id/btn_confirm"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+                android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:text="확인"
-                android:textAllCaps="false" />
+                android:textAllCaps="false"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/btn_cancel"/>
 
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 </layout>
