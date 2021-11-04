@@ -1,14 +1,20 @@
 package com.luke.timetable
 
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.*
 import android.os.Bundle
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.edit
 import androidx.databinding.DataBindingUtil
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.luke.timetable.data.Subject
 import com.luke.timetable.databinding.ActivityMainBinding
 import kotlin.math.ceil
 
@@ -17,59 +23,83 @@ class MainActivity : AppCompatActivity() {
 
     private val mainViewModel: MainViewModel by viewModels()
     private lateinit var binding: ActivityMainBinding
+    val bottomSheetDialog = SubjectAddFragment()
+    lateinit var subjectDetailDialog : SubjectDetailDialog
+    lateinit var sharedPreferences : SharedPreferences
+
     lateinit var header: LinearLayout
     lateinit var column: LinearLayout
     lateinit var row: LinearLayout
+    lateinit var subjects: MutableList<Subject>
+
     var density = 0
     var rowHeight = 0f
     var rowWidth = 0f
     var scale = 48
-
+    var idx = 0
     private var weeks = listOf(
         "월", "화", "수", "목", "금", "토", "일"
     )
     private var times = listOf(
         9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7
     )
-    private var subjects = mutableListOf<Subject>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        density = ceil(resources.displayMetrics.density).toInt()
 
-        val bottomSheetDialog = AddSubjectFragment()
+        sharedPreferences = getSharedPreferences("timetable", Context.MODE_PRIVATE)
+        idx = sharedPreferences.getInt("idx", 0)
+        subjects = saveSubjects()
+        density = ceil(resources.displayMetrics.density).toInt()
 
         binding = DataBindingUtil.setContentView<ActivityMainBinding>(this, R.layout.activity_main)
             .apply {
                 lifecycleOwner = this@MainActivity
                 viewModel = mainViewModel
             }
-        drawTimetable()
-        binding.btnAdd.setOnClickListener {
-            bottomSheetDialog.show(supportFragmentManager, "tag")
-        }
 
+        mainViewModel.apply {
+            drawTimetable(subjects)
+            setSubjectIdx(idx)
+            setSubject(subjects)
+            lists.observe(this@MainActivity, {
+                subjects = lists.value!!
+                drawColumn(subjects)
+                loadSubjects(subjects)
+            })
+            openAddSubject.observe(this@MainActivity, {
+                bottomSheetDialog.show(supportFragmentManager, "bottomSheet")
+            })
+            addSubjectIdx.observe(this@MainActivity, EventObserver{
+                idx += 1
+                sharedPreferences.edit {
+                    putInt("idx", idx)
+                }
+            })
+            navigateToSubjectListActivity.observe(this@MainActivity, EventObserver{
+                val intent= Intent(this@MainActivity, SubjectListActivity::class.java).apply {
+                    putParcelableArrayListExtra("lists", ArrayList(lists.value!!))
+                }
+                startActivity(intent)
+            })
+        }
     }
 
-    private fun drawTimetable() {
-        makeDataset()
+    fun saveSubjects(): MutableList<Subject> {
+        val tmpLists = sharedPreferences.getString("subjectLists", "")
+        return Gson().fromJson(tmpLists, object : TypeToken<MutableList<Subject>>() {}.type)
+    }
+
+    fun loadSubjects(subjects: MutableList<Subject>){
+        sharedPreferences.edit {
+            putString("subjectLists", Gson().toJson(subjects, object : TypeToken<MutableList<Subject>>() {}.type))
+        }
+    }
+
+    private fun drawTimetable(subjects: MutableList<Subject>) {
         drawTimetableHeader()
         drawRow()
         drawColumn(subjects)
-
-    }
-
-    private fun makeDataset() {
-        subjects.add(Subject("소프트웨어공학", "14:00", "16:00", 1, 1))
-        subjects.add(Subject("소프트웨어공학", "14:00", "16:00", 3, 1))
-        subjects.add(Subject("사랑의 실천", "12:00", "13:30", 1, 3))
-        subjects.add(Subject("사랑의 실천", "12:00", "13:30", 3, 3))
-        subjects.add(Subject("인공지능", "10:30", "12:30", 0, 2))
-        subjects.add(Subject("인공지능", "15:00", "17:00", 4, 2))
-        subjects.add(Subject("컴파일러", "14:00", "16:00", 0, 4))
-        subjects.add(Subject("컴파일러", "17:00", "19:00", 2, 4))
-        subjects.add(Subject("라틴아메리카", "13:00", "15:00", 2, 5))
-        subjects.add(Subject("라틴아메리카", "9:00", "10:30", 4, 5))
     }
 
     fun drawTimetableHeader() {
@@ -82,7 +112,6 @@ class MainActivity : AppCompatActivity() {
             tv.apply {
                 text = weeks[i]
                 gravity = Gravity.CENTER
-//                setTextColor(resources.getColor(R.color.black, theme))
                 setBackgroundResource(R.drawable.bg_line_left_border_timetable)
             }
             header.addView(tv)
@@ -124,6 +153,7 @@ class MainActivity : AppCompatActivity() {
 
     fun drawColumn(list: List<Subject>) {
         column = findViewById(R.id.layout_column)
+        column.removeAllViews()
         for (i in 0 until 5) {
             var startTime = 9f
             val tmpList = classifySubject(list, i)
@@ -134,7 +164,6 @@ class MainActivity : AppCompatActivity() {
                 drawSubject(ll, (density*scale*(timeToFloat(tmpList[j].endTime)-startTime)).toInt(), tmpList[j])
                 startTime = timeToFloat(tmpList[j].endTime)
             }
-//            ll.setBackgroundColor(Color.BLUE)
             column.addView(ll)
         }
     }
@@ -146,20 +175,20 @@ class MainActivity : AppCompatActivity() {
     }
     fun drawSubject(linearLayout: LinearLayout, height: Int, subject: Subject){
         val view = layoutInflater.inflate(R.layout.cell_subject, linearLayout, false) as TextView
-        view.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, height-density*2)
-        view.background = view.context.getDrawable(R.drawable.bg_round_border_subject_color_67)
-//        val marginParam = linearLayout.layoutParams as ViewGroup.MarginLayoutParams
-//        marginParam.setMargins(0,0,0,-100)
-//        marginParam.bottomMargin = dptopx(10).toInt()
-//        view.layoutParams = marginParam
-        view.setText(subject.name)
-        view.setBackgroundResource(setColor(subject.color))
+        view.apply{
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, height-density*2)
+            background = view.context.getDrawable(R.drawable.bg_round_border_subject_color_67)
+            setText(subject.name+"\n"+subject.professor)
+            setBackgroundResource(setColor(subject.color))
+            setOnClickListener {
+                subjectDetailDialog = SubjectDetailDialog(subject)
+                subjectDetailDialog.show(supportFragmentManager, "detailSubject")
+            }
+        }
         linearLayout.addView(view)
         val line = layoutInflater.inflate(R.layout.cell_subject_bottom, linearLayout, false) as View
         line.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, density*2)
         linearLayout.addView(line)
-
-
     }
 
     fun classifySubject(list:List<Subject>, day: Int): List<Subject>{
@@ -200,7 +229,6 @@ class MainActivity : AppCompatActivity() {
             8 -> R.drawable.bg_round_border_subject_color_35
             9 -> R.drawable.bg_round_border_subject_color_69
             else -> R.drawable.bg_round_border_subject_color_67
-
         }
     }
 }

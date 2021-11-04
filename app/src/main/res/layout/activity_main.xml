@@ -14,26 +14,45 @@
         android:id="@+id/cl1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="30dp"
+        android:layout_marginHorizontal="30dp"
+        android:layout_marginBottom="20dp"
         tools:context=".MainActivity">
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cl_title"
+            android:layout_width="wrap_content"
+            android:layout_height="70dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/layout_header"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="새시간표 1"
+                android:textSize="20dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
         <LinearLayout
             android:id="@+id/layout_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/cl_title"/>
 
         <ScrollView
             android:id="@+id/sv_timetable"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="30dp"
             android:layout_marginBottom="20dp"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/layout_header"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/tv1">
+            app:layout_constraintBottom_toTopOf="@+id/btn_add">
             <FrameLayout
                 android:id="@+id/fl"
                 android:layout_width="match_parent"
@@ -62,8 +81,35 @@
             android:gravity="center"
             android:textColor="@color/white"
             android:background="@drawable/bg_button_activated"
+            android:onClick="@{() -> viewModel.openBottomSheet()}"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"/>
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btn_remove_all"/>
+        <Button
+            android:id="@+id/btn_remove_all"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:text="모두 삭제"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:background="@drawable/bg_button_activated"
+            app:layout_constraintTop_toTopOf="@+id/btn_add"
+            app:layout_constraintBottom_toBottomOf="@+id/btn_add"
+            app:layout_constraintStart_toEndOf="@+id/btn_add"
+            app:layout_constraintEnd_toStartOf="@+id/btn_look_up"/>
+        <Button
+            android:id="@+id/btn_look_up"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:text="수업 조회"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:background="@drawable/bg_button_activated"
+            android:onClick="@{() -> viewModel.navigateToSubjectListActivity()}"
+            app:layout_constraintTop_toTopOf="@+id/btn_add"
+            app:layout_constraintBottom_toBottomOf="@id/btn_add"
+            app:layout_constraintStart_toEndOf="@+id/btn_remove_all"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

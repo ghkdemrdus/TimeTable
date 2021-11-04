@@ -2,9 +2,10 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
-
     <data>
-
+        <variable
+            name="viewmodel"
+            type="com.luke.timetable.MainViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -44,9 +45,20 @@
                 android:ems="10"
                 android:inputType="textPersonName"
                 android:hint="수업명"
+                android:text="@={viewmodel.title}"
                 app:layout_constraintTop_toBottomOf="@+id/tv1"
                 app:layout_constraintStart_toStartOf="parent" />
 
+            <EditText
+                android:id="@+id/et2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:inputType="textPersonName"
+                android:hint="교수명"
+                android:text="@={viewmodel.professor}"
+                app:layout_constraintTop_toBottomOf="@id/et1"
+                app:layout_constraintStart_toStartOf="parent"/>
 
             <TextView
                 android:id="@+id/btn_select_time"
@@ -54,85 +66,39 @@
                 android:layout_height="wrap_content"
                 android:text="요일 및 시간 선택"
                 android:textColor="@color/primaryLight"
+                android:onClick="@{() -> viewmodel.addTime()}"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/et1"
+                app:layout_constraintTop_toBottomOf="@id/et2"
                 android:layout_marginTop="10dp" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/cl1"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="100dp"
                 app:layout_constraintTop_toBottomOf="@+id/btn_select_time"
                 android:layout_marginTop="10dp">
-
-                <TextView
-                    android:id="@+id/tv4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="월요일"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
-
-                <TextView
-                    android:id="@+id/tv5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="13dp"
-                    android:text="00:00"
-                    app:layout_constraintTop_toTopOf="@+id/tv4"
-                    app:layout_constraintStart_toEndOf="@+id/tv4"
-                    app:layout_constraintBottom_toBottomOf="@id/tv4" />
-
-                <TextView
-                    android:id="@+id/tv6"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="13dp"
-                    android:text="~"
-                    app:layout_constraintTop_toTopOf="@+id/tv4"
-                    app:layout_constraintStart_toEndOf="@id/tv5"
-                    app:layout_constraintBottom_toBottomOf="@id/tv4" />
-
-                <TextView
-                    android:id="@+id/tv7"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="13dp"
-                    android:text="00:00"
-                    app:layout_constraintTop_toTopOf="@+id/tv4"
-                    app:layout_constraintStart_toEndOf="@id/tv6"
-                    app:layout_constraintBottom_toBottomOf="@id/tv4" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_subject_add_time"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <TextView
-                android:id="@+id/tv8"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="색상 선택"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/cl1" />
-
-            <Spinner
-                android:id="@+id/spinner"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="@id/tv8"
-                app:layout_constraintStart_toEndOf="@id/tv8"
-                app:layout_constraintBottom_toBottomOf="@id/tv8" />
 
             <TextView
                 android:id="@+id/btn_register"
                 android:layout_width="90dp"
                 android:layout_height="50dp"
-                android:layout_marginTop="30dp"
-                android:layout_marginBottom="30dp"
-                android:text="등록"
-                android:gravity="center"
-                android:textColor="@color/white"
+                android:layout_marginTop="20dp"
                 android:background="@drawable/bg_button_activated"
-                app:layout_constraintStart_toStartOf="parent"
+                android:gravity="center"
+                android:text="등록"
+                android:textColor="@color/white"
+                android:onClick="@{() -> viewmodel.addSubject()}"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tv8" />
+                app:layout_constraintHorizontal_bias="0.498"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/cl1" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

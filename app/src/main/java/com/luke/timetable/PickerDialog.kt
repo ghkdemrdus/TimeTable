@@ -3,23 +3,27 @@ package com.luke.timetable
 import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.NumberPicker
-import androidx.databinding.DataBindingUtil
+import android.widget.Toast
 import androidx.fragment.app.DialogFragment
-import com.luke.timetable.databinding.FragmentAddSubjectBinding
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.luke.timetable.data.SubjectTime
 import com.luke.timetable.databinding.PickerSubjectTimeBinding
 
-class PickerDialog : DialogFragment() {
+class PickerDialog() : DialogFragment() {
 
     private lateinit var binding: PickerSubjectTimeBinding
+    private val mainViewModel: MainViewModel by lazy {
+        ViewModelProvider(requireActivity(), object : ViewModelProvider.Factory{
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T = MainViewModel() as T
+        }).get(MainViewModel::class.java)
+    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
 
         binding = PickerSubjectTimeBinding.inflate(LayoutInflater.from(context))
+
         val builder = AlertDialog.Builder(context)
 
         val weeks = arrayOf("월", "화", "수", "목", "금")
@@ -85,23 +89,24 @@ class PickerDialog : DialogFragment() {
                 dismiss()
             }
             btnConfirm.setOnClickListener {
-                val bundle = Bundle()
-                bundle.apply {
-                    putString("day", day)
-                    putString("startHour", startHour)
-                    putString("startMinute", startMinute)
-                    putString("endHour", endHour)
-                    putString("endMinute", endMinute)
+                if(startHour.toFloat()+(startMinute.toFloat()/60) >= endHour.toFloat()+(endMinute.toFloat()/60)){
+                    Toast.makeText(requireContext(), "시간을 다시 확인해주세요", Toast.LENGTH_SHORT).show()
+                } else{
+                    mainViewModel.addSubjectTime(SubjectTime(dayToInt(day), "$startHour:$startMinute", "$endHour:$endMinute"))
+                    dismiss()
                 }
-                val addSubjectFragment = AddSubjectFragment()
-                addSubjectFragment.arguments = bundle
-                activity?.supportFragmentManager!!.beginTransaction()
-                    .replace(R.id.bottomSheetDashBoardLayout, addSubjectFragment)
-                    .commit()
             }
         }
         builder.setView(binding.root)
         return builder.create()
     }
-
+    fun dayToInt(string: String): Int{
+        return when(string){
+            "월" -> 0
+            "화" -> 1
+            "수" -> 2
+            "목" -> 3
+            else -> 4
+        }
+    }
 }

@@ -2,6 +2,8 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-kapt'
+    id 'kotlin-parcelize'
+    id 'dagger.hilt.android.plugin'
 }
 
 android {
@@ -40,6 +42,9 @@ android {
 }
 
 dependencies {
+    def daggerVersion = '2.25.4'
+    def preference_version = "1.1.1"
+
 
     implementation 'androidx.core:core-ktx:1.6.0'
     implementation 'androidx.appcompat:appcompat:1.3.1'
@@ -53,15 +58,44 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1'
+    
+    //hilt
+    implementation "com.google.dagger:hilt-android:2.37"
+    kapt "com.google.dagger:hilt-android-compiler:2.37"
 
     //hilt + viewmodel
     implementation "androidx.fragment:fragment-ktx:1.2.5"
     implementation "androidx.hilt:hilt-common:1.0.0"
-//    kapt "androidx.hilt:hilt-compiler:1.0.0"
+    kapt "androidx.hilt:hilt-compiler:1.0.0"
 
     //hilt
     implementation "com.google.dagger:hilt-android:2.37"
 //    kapt "com.google.dagger:hilt-android-compiler:2.28-alpha"
 
+    //recyclerView
+    implementation "androidx.recyclerview:recyclerview:1.2.1"
+
+    // Security - encryptedSharePreference
+    implementation "androidx.security:security-crypto:1.1.0-alpha03"
+
+// Dagger
+    implementation "com.google.dagger:dagger:$daggerVersion"
+    kapt "com.google.dagger:dagger-compiler:$daggerVersion"
+    implementation "com.google.dagger:dagger-android-support:$daggerVersion"
+    kapt "com.google.dagger:dagger-android-processor:$daggerVersion"
+
+    // Using Dagger in androidTest and Robolectric too
+    kaptAndroidTest "com.google.dagger:dagger-compiler:$daggerVersion"
+    kaptTest "com.google.dagger:dagger-compiler:$daggerVersion"
+
+    //sharedPreference
+    implementation "androidx.preference:preference-ktx:$preference_version"
+
+    //gson
+    implementation 'com.google.code.gson:gson:2.8.5'
+
+    //이미지 로딩 라이브러리:glide 이미지 url을 로딩시켜 뷰에 연결해주는 라이브러리
+    implementation 'com.github.bumptech.glide:glide:4.12.0'
+    kapt "com.github.bumptech.glide:compiler:4.12.0"
 
 }
